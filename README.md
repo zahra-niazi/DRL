@@ -8,5 +8,4 @@ In the tutorial section, you will find a step-by-step guide to understanding the
 
 ## Implementation Report
 
-The implementation report is based on the article ["Stabilizing Deep Q-Learning with ConvNets under Data Augmentation."](https://arxiv.org/abs/2107.00644) This report provides an analysis of the ideas presented in the article, along with some suggestions for improvement.
-
+The implementation report is based on the article ["Stabilizing Deep Q-Learning with ConvNets under Data Augmentation."](https://arxiv.org/abs/2107.00644) This report provides an analysis of the ideas presented in the article, along with some suggestions for improvement. The updated code for this article is available in [this](https://github.com/zahra-niazi/dmcontrol-generalization-benchmark) repo. You can run it in this [colab](https://github.com/zahra-niazi/dmcontrol-generalization-benchmark/blob/svea/dmcgb.ipynb).
