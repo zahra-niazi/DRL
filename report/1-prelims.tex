@@ -1,0 +1,41 @@
+\newpage
+\section{Preliminaries}
+\subsection{dm-control\cite{tunyasuvunakool2020}}
+Controlling the physical world is an essential aspect and arguably a prerequisite for achieving general intelligence. Primates, which have been engaging in two-handed manipulation for millions of years, provide the only known example of general-purpose intelligence.
+In contrast to board games, language, and other symbolic domains, physical tasks possess a fundamental characteristic of continuity in terms of state, time, and action. The dynamics of physical systems adhere to second-order equations of motion, where the state is comprised of positions and velocities. Sensory signals, or observations, carry meaningful physical units and exhibit variations over corresponding timescales. These unique properties, along with their widespread occurrence and significance, distinguish control problems as a distinctive subset within the realm of general Markov Decision Processes. Notably, in many physical control tasks, there exists a fixed subset of degrees of freedom within the agent's body that can be directly manipulated, while the remaining degrees of freedom belong to the surrounding environment. These "embodied" tasks represent the central focus of \dmcontrol.
+
+\subsubsection{Tasks}
+In recent years, there has been significant advancement in the application of Reinforcement Learning (RL) to challenging problem domains, including video games. The Arcade Learning Environment (ALE) played a crucial role in facilitating these advancements by providing a standardized set of benchmarks for evaluating and comparing learning algorithms. Similarly, in the field of control and robotics, there is a need for well-designed task suites that serve as a standardized platform where different approaches can compete and new methods can emerge.
+The OpenAI Gym has become a widely adopted benchmark in continuous RL, offering a collection of continuous control domains. To meet the growing demand for task suites that enable the study of algorithms related to multi-scale control, multi-task transfer, and meta-learning, various recent task suites have been introduced, such as Meta-world, SURREAL, RLbench and IKEA. These task suites aim to provide diverse environments for experimentation. Similarly, \dmcontrol offers its own set of control tasks, categorized into three distinct categories: 
+
+\begin{description}
+\item{\textbf{Control Suite}}
+
+The DeepMind \textsf{Control Suite}, is built directly with the \mujoco wrapper, provides a set of standard benchmarks for continuous control problems. The unified reward structure offers interpretable learning curves and aggregated suite-wide performance measures. Furthermore, it emphasises high-quality, well-documented code using uniform design patterns, offering a readable, transparent and easily extensible codebase.
+%
+\item{\textbf{Locomotion}}
+
+The Locomotion framework is designed to facilitate the implementation of a wide range of locomotion tasks for RL algorithms by introducing self-contained, reusable components which compose into different task variants. 
+%
+\item{\textbf{Manipulation}}
+
+We also provide examples of constructing robotic manipulation tasks. These tasks involve grabbing and manipulating objects with a 3D robotic arm. The set of tasks includes examples of reaching, placing, stacking, throwing, assembly and disassembly.
+The tasks are designed to be solved using a simulated 6 degree-of-freedom robotic arm based on the Kinova Jaco, though their modular design permit the use of other arms with minimal changes. 
+These tasks make use of reusable components such as bricks that snap together, and provide examples of reward functions for manipulation.
+Tasks can be run using vision, low-level features, or combinations of both.
+
+\end{description}
+
+\newpage
+\subsection{The Distracting Control Suite\cite{stone2021distracting}}
+Robotic systems often encounter demanding perceptual conditions, such as variations in viewpoint, lighting, and background. However, existing simulated reinforcement learning benchmarks, like DM Control, lack such complexities in visual input. Consequently, the performance of well-established methods on these benchmarks may not translate effectively to real-world scenarios. Here this limitation is addressed by expanding DM Control to include three types of visual distractions: variations in background, color, and camera pose. This augmented benchmark serves as a challenging testbed for vision-based control, and the study evaluates state-of-the-art RL algorithms within these settings. The experimental results reveal that current RL methods for vision-based control exhibit subpar performance in the presence of distractions. Furthermore, the performance deteriorates as the complexity of distractions increases, highlighting the necessity for novel approaches capable of handling the visual intricacies encountered in real-world environments. Additionally, the research findings indicate that combinations of multiple distraction types pose greater difficulties than merely aggregating their individual effects.
+
+A significant challenge in perception is the ability to extract task-relevant information from sensory input while filtering out distractions that may introduce misleading correlations in subsequent tasks. However, DM Control lacks such distractions, as the agent is presented with a consistent camera view, fixed lighting conditions, and a static background. Since any observation change in DM Control corresponds directly to a change in a task-relevant state variable, it does not allow for the measurement or development of the capability to filter out irrelevant variations through perception.
+
+To address this limitation, the Distracting Control Suite is introduced, which is an expansion of DM Control specifically designed with real-world robot learning in mind. This extension incorporates three distinct types of distractions: random color changes applied to all objects in the scene, random video backgrounds, and random continuous variations in camera pose. Each distraction can be implemented in a static setting, where changes occur only during episode transitions, or in a dynamic setting, where distractions change smoothly between frames. Furthermore, the difficulty of each distraction can be adjusted, ranging from barely noticeable to highly distracting. Additionally, all three types of distractions can be combined in any desired manner, allowing for arbitrary combinations of distractions.
+
+\newpage
+\subsection{DMControl Generalization Benchmark\cite{hansen2021softda}}
+We assess the performance of our method on a set of tasks taken from the DeepMind Control Suite (DMControl), as well as in the domain of robotic manipulation. The DMControl Suite consists of a diverse range of challenging continuous control tasks and is widely recognized as a benchmark for vision-based RL. To measure the generalization capabilities of our method, a new benchmark called DMControl Generalization Benchmark (DMControl-GB) is introduced, which is built upon DMControl. In this benchmark, agents are trained in a fixed environment referred to as the training environment, and we evaluate their generalization performance on two distinct test distributions: (1) environments with randomized colors and (2) environments with natural videos serving as backgrounds. These test distributions represent the color hard and video easy benchmarks within DMControl-GB.
+
+While DMControl-GB provides a solid platform for evaluating algorithm performance, our ultimate objective is to develop algorithms capable of solving real-world problems using vision-based RL. To better emulate real-world deployment scenarios, we also consider a robotic manipulation task involving a robotic arm in a simulated environment. Similar to DMControl-GB, agents are trained in a fixed environment and then evaluated in environments with randomized colors and video backgrounds. Additionally, we introduce random perturbations to camera settings, lighting conditions, and texture variations during testing to simulate real-world conditions.

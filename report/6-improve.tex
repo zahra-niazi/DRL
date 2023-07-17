@@ -1,0 +1,40 @@
+\newpage
+\section{My Experiments}
+
+When exploring enhancements for SVEA, there are several factors to consider. Given the limitations imposed by hardware, we need to scale our suggestions to align with the available GPUs provided by Google Collaboratory. Within this context, we focus on two aspects of the problem formulation:
+\begin{enumerate}
+    \item Introducing non-determinism in the test environment. This entails considering how this change should be reflected in the applied data augmentations.
+    
+    \item Analyzing the relationship between adjustments made to the test domain's parameters and the corresponding modifications required for data augmentation parameters. 
+\end{enumerate}
+
+\subsection{Non-Determinism}
+Training an RL algorithm for continuous control tasks in a deterministic environment can simplify the learning process as the agent can directly associate actions with specific outcomes. However, there are a few considerations to keep in mind. First, deterministic environments may not fully capture the complexity and uncertainty of real-world scenarios. If the goal is to develop RL algorithms that can generalize to uncertain or stochastic environments, training solely in a deterministic environment may limit the algorithm's ability to adapt to such conditions.
+Ultimately, in some cases, training in a deterministic environment may result in the agent overfitting to that specific environment. The learned policy may not generalize well to different variations or perturbations of the environment. To address this, it can be beneficial to introduce randomization or variability during training, such as through the use of stochastic dynamics or adding noise to the actions or observations.
+
+The DMControl environments are, in fact, deterministic by default. To make them non-deterministic, you can introduce stochasticity into the environments by adding random factors. Here's how you can achieve this:
+\begin{itemize}
+    \item \textbf{Perturb the dynamics:} You can introduce random noise or variations in the dynamics of the environment. This can be done by modifying the physics parameters, such as friction, mass, or joint constraints, with random values.
+
+    \item \textbf{Add sensory noise:} Introduce random noise to the observations received by the agent. This can simulate uncertainty or variability in the sensor measurements.
+
+    \item \textbf{Randomize initial conditions:} Vary the initial states of the environment to provide different starting points for each episode. This can be done by sampling initial positions, velocities, or other relevant variables from a distribution.
+
+    \item \textbf{Modify reward functions:} Randomize or introduce stochasticity in the rewards given to the agent. This can create variability in the feedback received and affect the agent's behavior.
+    
+\end{itemize}
+
+
+By applying these techniques, we can introduce non-determinism into the DMControl environments, making them more realistic and challenging for reinforcement learning algorithms.
+
+In DM Control Suite we have the following parameters that can be used for this purpose:
+\begin{itemize}
+    \item $random$: Optional, either a `numpy.random.RandomState` instance, an integer
+        seed for creating a new `RandomState`, or None to select a seed automatically (default).
+\end{itemize}
+We can choose the same seed for the training environment and the testing environment and therefore we will have a non-deterministic test environment.
+
+
+\subsection{Adjusting the augmentations}
+The application of weak augmentation, such as random shift, has been shown to improve sample efficiency without causing significant issues. However, it has been observed that strong augmentation, such as random convolution, can lead to instability and poor sample efficiency. The use of stronger and more varied augmentations, including random convolution, random overlay, and affine-jitter, has the potential to enhance generalization to a broader range of Markov Decision Processes (MDPs). 
+In SVEA, we add random convolution to make the augmented image. Here we will attempt to use random overlay alongside random convolution.

@@ -1,0 +1,51 @@
+\newpage
+\section{Stabilized $Q$-Value Estimation under Augmentation\cite{hansen2021stabilizing}}
+Reinforcement Learning (RL) with visual observations has shown impressive success in various applications. However, the challenge lies in generalizing the learned skills to new environments, especially in high-dimensional observation spaces like images. To tackle this, researchers have explored domain randomization and data augmentation techniques to increase training data variability and promote invariant policies. Simple augmentations like cropping and translation have improved sample efficiency, but additional augmentation can decrease efficiency and lead to divergence. Balancing stability and generalization in RL requires careful trial and error, as the introduction of diverse data poses optimization challenges and risks instability, distinguishing it from supervised learning approaches.
+
+To address these problems, \textbf{SVEA} (\textbf{S}tabilized $Q$-\textbf{V}alue \textbf{E}stimation under \textbf{A}ugmentation) is proposed. It is a simple yet effective framework for data augmentation in off-policy RL that greatly improves stability of $Q$-value estimation. 
+
+\subsection{\textbf{Method}}
+The method introduced is called SVEA: \textbf{S}tabilized $Q$-\textbf{V}alue \textbf{E}stimation under \textbf{A}ugmentation, which is a comprehensive framework for achieving visual generalization in reinforcement learning (RL) through the application of data augmentation. SVEA utilizes a novel learning approach that incorporates two distinct data streams: one with augmented data and another without augmentation. This method seamlessly integrates with any standard off-policy RL algorithm without requiring modifications to the underlying neural network that parameterizes the policy. Additionally, it does not involve additional forward passes, auxiliary tasks, or learnable parameters. While SVEA in principle does not make any assumptions about the structure of states $\mathbf{s}_{t} \in \mathcal{S}$,  this method is described within the context of image-based RL.
+
+
+\subsubsection{\textbf{Architectural Overview}}
+This approach utilizes common neural network architectures in off-policy RL without introducing additional learnable parameters. In this method, the neural network layers and corresponding learnable parameters of the state-action value function are divided into two sub-networks:
+\begin{itemize}
+    \item $f_{\theta}$ referred to as the state encoder
+    \item $Q_{\theta}$ referred to as the Q-function
+\end{itemize}
+This subdivision allows us to predict the Q-value, $q_{t}$, for a given state-action pair $(\mathbf{s}_{t}, \mathbf{a}_{t})$ as:
+\begin{center}
+$q_{t} \triangleq Q_{\theta}(f_{\theta}(\mathbf{s}_{t}), \mathbf{a}_{t})$
+\end{center}
+Similarly, the target $Q$-value for $(\mathbf{s}_{t}, \mathbf{a}_{t})$ is defined as:
+\begin{center}
+$q^{\textnormal{tgt}}_{t} \triangleq r(\mathbf{s}_{t}, \mathbf{a}_{t}) + \gamma \max_{\mathbf{a}'_{t}} Q^{\textnormal{tgt}}_{\psi}(f^{^{\textnormal{tgt}}}_{\psi}(\mathbf{s}_{t+1}), \mathbf{a}')$
+\end{center}
+where $\gamma$ is the discount factor, and $\psi$ represents parameters defined as an exponential moving average of $\theta$. Depending on the chosen algorithm, we may also incorporate a parameterized policy, $\pi_{\theta}$, that shares the encoder parameters with $Q_{\theta}$ and selects actions $\mathbf{a}_{t} \sim \pi_{\theta}(\cdot|f_{\theta}(\mathbf{s}_{t}))$.
+
+To avoid incorrect bootstrapping resulting from augmented data, data augmentation is strictly applied only in the estimation of Q-values for the current state, $\mathbf{s}_{t}$, and not to the successor state, $\mathbf{s}_{t+1}$, used for bootstrapping with $Q^{\text{tgt}}_{\psi}$ (and $\pi_{\theta}$ if applicable). To mitigate over-regularization during the optimization of $f_{\theta}$ and $Q_{\theta}$, we utilize a modified Q-objective that incorporates both augmented and unaugmented data.
+
+\subsubsection{\textbf{Learning Objective}}
+This method redefines the temporal difference objective to better leverage data augmentation. First, recall that $q^{\textnormal{tgt}}_{t} = r(\mathbf{s}_{t}, \mathbf{a}_{t}) + \gamma \max_{\mathbf{a}'_{t}} Q^{\textnormal{tgt}}_{\psi}(f^{^{\textnormal{tgt}}}_{\psi}(\mathbf{s}_{t+1}), \mathbf{a}')$. Instead of learning to predict $q^{\textnormal{tgt}}_{t}$ only from state $\mathbf{s}_{t}$, it is proposed to minimize a nonnegative linear combination of $\mathcal{L}_{Q}$ over two individual data streams, $\textcolor{citecolor}{\mathbf{s}_{t}}$ and $\textcolor{Fuchsia}{\mathbf{s}^{\textnormal{aug}}_{t} = \tau(\mathbf{s}_{t}, \nu),~\nu \sim \mathcal{V}}$, which is then defined as the objective
+\begin{align}
+    \mathcal{L}^{\textbf{SVEA}}_{Q}(\theta, \psi) & \triangleq \textcolor{citecolor}{\alpha \mathcal{L}_{Q}\left(\mathbf{s}_{t}, q^{\textnormal{tgt}}_{t}; \theta, \psi\right)} + \textcolor{Fuchsia}{\beta \mathcal{L}_{Q}\left(\mathbf{s}^{\textnormal{aug}}_{t}, q^{\textnormal{tgt}}_{t}; \theta,\psi\right)} \\
+    \label{eq:new-critic-loss}
+    & = \mathbb{E}_{\mathbf{s}_{t}, \mathbf{a}_{t}, \mathbf{s}_{t+1} \sim \mathcal{B}} \left[ \textcolor{citecolor}{\alpha \left\| Q_{\theta}(f_{\theta}(\mathbf{s}_{t}), \mathbf{a}_{t}) - q^{\textnormal{tgt}}_{t} \right\|^{2}_{2}} + \textcolor{Fuchsia}{\beta \left\| Q_{\theta}(f_\theta(\mathbf{s}^{\textnormal{aug}}_{t}), \mathbf{a}_{t}) - q^{\textnormal{tgt}}_{t} \right\|^{2}_{2}} \right] \,,
+\end{align}
+where $\textcolor{citecolor}{\alpha}, \textcolor{Fuchsia}{\beta}$ are constant coefficients that balance the ratio of the \textcolor{citecolor}{unaugmented} and \textcolor{Fuchsia}{augmented} data streams, respectively, and $q^{\textnormal{tgt}}_{t}$ is computed strictly from unaugmented data. $\mathcal{L}^{\textbf{SVEA}}_{Q}(\theta, \psi)$ serves as a \textit{data-mixing} strategy that \textbf{oversamples unaugmented data as an implicit variance reduction technique}. Data-mixing is a simple and effective technique for variance reduction that works well in tandem with the modifications proposed for bootstrapping. 
+For $\alpha=\beta$, the objective in Eq. \ref{eq:new-critic-loss} can be evaluated in a single, batched forward-pass by rewriting it as:
+\begin{align}
+    \mathbf{g}_{t} & = \left[ \textcolor{citecolor}{\mathbf{s}_{t}}, \textcolor{Fuchsia}{\tau(\mathbf{s}_{t}, \nu)}\right]_{\textnormal{N}}
+    \\
+    h_{t} & = \left[ q^{\textnormal{tgt}}_{t}, q^{\textnormal{tgt}}_{t} \right]_{\textnormal{N}} \\
+    \label{eq:new-critic-loss-single-forward-pass}
+     \mathcal{L}^{\textbf{SVEA}}_{Q}(\theta, \psi) & = \mathbb{E}_{\mathbf{s}_{t}, \mathbf{a}_{t}, \mathbf{s}_{t+1} \sim \mathcal{B},~\nu \sim \mathcal{V}} \left[
+    (\alpha + \beta) \left\| Q_{\theta}(f_\theta(\mathbf{g}_{t}), \mathbf{a}_{t}) - h_{t} \right\|^{2}_{2} \right]\,,
+\end{align}
+
+\subsection{\textbf{Setup}}The method and baselines are implemented using the Soft Actor-Critic (SAC) algorithm as the base. By default, random shift augmentation is incorporated into all methods. The base algorithm is referred to as the "unaugmented" version and we examine its stability under additional data augmentation. For all methods (when applicable), identical network architectures and hyperparameters are employed. Observations consist of stacked RGB frames, with a size of $84\times84\times3$. In the DMControl-GB and DistractingCS benchmarks, we train all methods for 500k frames and evaluate them on the same 5 tasks used in prior work. The same experimental setup is also applied to the robotic manipulation experiments.
+
+
+\subsection{\textbf{Implementation Details}}
+\textbf{Network architecture.} For experiments in DMControl, the network architecture from \cite{hansen2021softda} is adopted, without any changes to the architecture nor hyperparameters. The shared encoder $f_{\theta}$ is implemented as an 11-layer CNN encoder that takes a stack of RGB frames rendered at $84\times84\times3$ and outputs features of size $32\times 21 \times 21$, where $32$ is the number of channels and $21\times21$ are the dimensions of the spatial feature maps. All convolutional layers use $32$ filters and $3\times3$ kernels. The first convolutional layer uses a stride of 2, while the remaining convolutional layers use a stride of 1. Following previous work on image-based RL for DMControl tasks, the shared encoder is followed by independent linear projections for the actor and critic of the Soft Actor-Critic base algorithm used in our experiments, and the actor and critic modules each consist of three fully connected layers with hidden dimension $1024$. Training takes approximately 24 hours on a single NVIDIA V100 GPU.
